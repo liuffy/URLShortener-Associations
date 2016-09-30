@@ -1,0 +1,47 @@
+class CLI
+
+  def run! # Collects e-mail and user's choice
+    login_user!
+    puts "What do you want to do?"
+    puts "0. Create shortened URL"
+    puts "1. Visit shortened URL"
+    choice = gets.chomp.to_i
+
+    case choice
+      when 0
+        create_url
+      when 1
+        visit_url
+    end
+  end
+
+  def login_user!
+    puts "Welcome to URL Shortener! To get started, enter your e-mail."
+    @current_user = User.find_by_email(gets.chomp)
+
+    raise "Sorry.That user doesn't exist" if @current_user.nil?
+     puts "Welcome #{@current_user.email}!"
+
+  end
+
+  def create_url
+    puts "Enter the URL you wish to shorten"
+    long_url = gets.strip
+    @shorty = ShortenedUrl.create_short_url!(@current_user, long_url)
+    puts "Here's your short URL: #{@shorty.short_url}"
+  end
+
+  def visit_url
+    puts "Enter the shortened url you would like to visit."
+    short_url = gets.chomp
+    @shortened_url = ShortenedUrl.find_by_short_url(short_url)
+
+    raise "That short url doesn't exist!!" if @shortened_url.nil?
+
+    Visit.record_visit!(@current_user, @shortened_url)
+  end
+
+end
+
+
+CLI.new.run!
